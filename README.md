@@ -132,6 +132,8 @@ This is the badge for Go Conference 2026.
 tinygo flash --target waveshare-rp2040-zero --size short --stack-size 8kb ./gocon2026badge/firmware/
 ```
 
+See [flashing.md](./gocon2026badge/flashing.md) for setup, BOOTSEL and troubleshooting.
+
 | Button on badge screen | Screen |
 |---|---|
 | A | Timetable |
