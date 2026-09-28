@@ -140,6 +140,25 @@ See [flashing.md](./gocon2026badge/flashing.md) for setup, BOOTSEL and troublesh
 | U | Breakout |
 | R | Cyclone game |
 | D | 3D demo |
-| L | Name tag (D shows the QR code) |
+| L | Slides (name tag, QR code, ...) |
 
 Press A on each screen to go back to the badge screen.
+On the slide screen, U and D switch slides.
+
+### slides
+
+Slides are 240x240 RGB565(BE) images, run-length encoded and embedded from
+`firmware/images/*.rle`. Generate them with the `gen-nametag` tool:
+
+```
+cd gocon2026badge/gen-nametag
+go run . -name やぎ -x yag13s -github yag13s -qr https://x.com/yag13s -out ../firmware/images
+go run . -slides logo.png,photo.png -out ../firmware/images
+go run . -pixelart avatar.png -out ../firmware/images
+```
+
+Then add a `//go:embed` line for the new `.rle` and append it to `slides` in
+`firmware/slides.go`.
+
+`-pixelart` detects the logical dot grid, samples each cell and scales it up by
+an integer factor, so JPEG noise is removed and the dots stay sharp.

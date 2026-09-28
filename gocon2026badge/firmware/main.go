@@ -30,8 +30,7 @@ const (
 	screenTimetable
 	screenBreakout
 	screenDemo
-	screenNametag
-	screenQR
+	screenSlides
 	screenCyclone
 )
 
@@ -116,6 +115,7 @@ func run() error {
 	cnt := 0
 	screen := screenBadge
 	var btnHold [6]int // 押しっぱなしの継続ポーリング回数 (0 = 離している)
+	slideIdx := 0      // 表示中のスライド番号
 	btnLabels := [6]string{"A", "B", "R", "U", "L", "D"}
 	// U/D はこの回数 (66.7ms x 6 ≈ 400ms) 以上の長押しでオートリピート
 	const btnRepeatDelay = 6
@@ -171,7 +171,7 @@ func run() error {
 				ledRainbow()
 			case screenDemo:
 				ledTwinkle()
-			case screenNametag, screenQR:
+			case screenSlides:
 				ledBreathe()
 			case screenCyclone:
 				ledCyclone()
@@ -217,9 +217,10 @@ func run() error {
 						case 5: // D: 疑似 3D デモ画面へ
 							screen = screenDemo
 							demoInit()
-						case 4: // L: 名札画面へ
-							screen = screenNametag
-							err := drawFullImage(display, nametagImg)
+						case 4: // L: スライド (名札 / QR / 追加画像) へ
+							screen = screenSlides
+							slideIdx = 0
+							err := drawSlide(display, slideIdx)
 							if err != nil {
 								return err
 							}
@@ -255,30 +256,21 @@ func run() error {
 							}
 						}
 
-					case screenNametag:
+					case screenSlides:
 						switch i {
-						case 5: // D: QR コード画面へ
-							screen = screenQR
-							err := drawFullImage(display, qrcodeImg)
+						case 5: // D: 次のスライドへ
+							slideIdx = nextSlide(slideIdx, +1)
+							err := drawSlide(display, slideIdx)
+							if err != nil {
+								return err
+							}
+						case 3: // U: 前のスライドへ
+							slideIdx = nextSlide(slideIdx, -1)
+							err := drawSlide(display, slideIdx)
 							if err != nil {
 								return err
 							}
 						case 0, 1, 4: // A/L: バッジ画面へ
-							err := toBadge()
-							if err != nil {
-								return err
-							}
-						}
-
-					case screenQR:
-						switch i {
-						case 3: // U: 名札画面へ戻る
-							screen = screenNametag
-							err := drawFullImage(display, nametagImg)
-							if err != nil {
-								return err
-							}
-						case 0, 1: // A: バッジ画面へ
 							err := toBadge()
 							if err != nil {
 								return err
